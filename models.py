@@ -8,18 +8,40 @@ class Usuario(UserMixin, db.Model):
     __tablename__ = "usuarios"
 
     id = db.Column(db.Integer, primary_key=True)
+
     nome = db.Column(db.String(100), nullable=False)
-    usuario = db.Column(db.String(50), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    senha = db.Column(db.String(255), nullable=False)
+
+    usuario = db.Column(
+        db.String(50),
+        unique=True,
+        nullable=False
+    )
+
+    email = db.Column(
+        db.String(120),
+        unique=True,
+        nullable=False
+    )
+
+    senha = db.Column(
+        db.String(255),
+        nullable=False
+    )
 
     tipo = db.Column(
-        db.Enum("admin", "funcionario"),
+        db.Enum(
+            "admin",
+            "funcionario",
+            name="tipo_usuario"
+        ),
         default="funcionario",
         nullable=False
     )
 
-    ativo = db.Column(db.Boolean, default=True)
+    ativo = db.Column(
+        db.Boolean,
+        default=True
+    )
 
     registros = db.relationship(
         "RegistroLimpeza",
@@ -31,16 +53,30 @@ class Ambiente(db.Model):
     __tablename__ = "ambientes"
 
     id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(100), nullable=False)
+
+    nome = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
     descricao = db.Column(db.Text)
 
     frequencia = db.Column(
-        db.Enum("diaria", "semanal", "quinzenal", "mensal"),
+        db.Enum(
+            "diaria",
+            "semanal",
+            "quinzenal",
+            "mensal",
+            name="tipo_frequencia"
+        ),
         default="diaria",
         nullable=False
     )
 
-    ativo = db.Column(db.Boolean, default=True)
+    ativo = db.Column(
+        db.Boolean,
+        default=True
+    )
 
     registros = db.relationship(
         "RegistroLimpeza",
@@ -71,14 +107,23 @@ class RegistroLimpeza(db.Model):
             "nao_limpo",
             "nao_autorizado",
             "sem_acesso",
-            "nao_necessario"
+            "nao_necessario",
+            name="tipo_status_limpeza"
         ),
         nullable=False
     )
 
     observacao = db.Column(db.Text)
-    data_registro = db.Column(db.Date, nullable=False)
-    hora_registro = db.Column(db.Time, nullable=False)
+
+    data_registro = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    hora_registro = db.Column(
+        db.Time,
+        nullable=False
+    )
 
     criado_em = db.Column(
         db.DateTime,
@@ -95,10 +140,14 @@ class RegistroLimpeza(db.Model):
         back_populates="registros"
     )
 
+
 class LogAcao(db.Model):
     __tablename__ = "logs_acoes"
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
 
     usuario_id = db.Column(
         db.Integer,
@@ -106,7 +155,10 @@ class LogAcao(db.Model):
         nullable=False
     )
 
-    acao = db.Column(db.String(255), nullable=False)
+    acao = db.Column(
+        db.String(255),
+        nullable=False
+    )
 
     criado_em = db.Column(
         db.DateTime,

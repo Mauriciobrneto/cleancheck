@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, sen
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date, datetime
+from zoneinfo import ZoneInfo
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from flask_wtf.csrf import CSRFProtect
@@ -37,6 +38,9 @@ def load_user(user_id):
 
 
 def admin_required():
+    def agora_brasil():
+        return datetime.now(ZoneInfo("America/Sao_Paulo"))
+    
     if current_user.tipo != "admin":
         flash("Acesso negado!", "danger")
         return False
@@ -44,6 +48,8 @@ def admin_required():
 
 
 def formatar_status(status):
+    def agora_brasil():
+        return datetime.now(ZoneInfo("America/Sao_Paulo"))
     status_formatado = {
     "limpo": "Limpo",
     "nao_limpo": "Não limpo"

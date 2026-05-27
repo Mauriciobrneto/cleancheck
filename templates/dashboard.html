@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h3 class="page-title">
+            Dashboard
+        </h3>
+
+        <div class="page-subtitle">
+            Painel geral do sistema
+        </div>
+    </div>
+
+    <div class="text-end">
+
+        <div class="small text-muted">
+            Hoje
+        </div>
+
+        <div class="fw-bold text-success">
+            {{ data_hoje }}
+        </div>
+
+    </div>
+
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-12 col-md-6 col-xl-3">
+
+        <div class="card shadow-sm border-0 h-100 cc-card-hover">
+
+            <div class="card-body">
+
+                <div class="text-muted small mb-2">
+                    Ambientes
+                </div>
+
+                <h2 class="fw-bold text-success">
+                    {{ total_ambientes }}
+                </h2>
+
+                <div class="small text-muted">
+                    Total de ambientes ativos
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+
+        <div class="card shadow-sm border-0 h-100 cc-card-hover">
+
+            <div class="card-body">
+
+                <div class="text-muted small mb-2">
+                    Limpezas hoje
+                </div>
+
+                <h2 class="fw-bold text-success">
+                    {{ limpezas_hoje }}
+                </h2>
+
+                <div class="small text-muted">
+                    Ambientes limpos hoje
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+
+        <div class="card shadow-sm border-0 h-100 cc-card-hover">
+
+            <div class="card-body">
+
+                <div class="text-muted small mb-2">
+                    Pendências
+                </div>
+
+                <h2 class="fw-bold text-warning">
+                    {{ pendentes }}
+                </h2>
+
+                <div class="small text-muted">
+                    Ainda não registrados
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+
+        <div class="card shadow-sm border-0 h-100 cc-card-hover">
+
+            <div class="card-body">
+
+                <div class="text-muted small mb-2">
+                    Problemas hoje
+                </div>
+
+                <h2 class="fw-bold text-danger">
+                    {{ problemas }}
+                </h2>
+
+                <div class="small text-muted">
+                    Não limpo / sem acesso
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+
+    <div class="card-header bg-white fw-bold">
+        Ações rápidas
+    </div>
+
+    <div class="card-body">
+
+        <div class="row g-3">
+
+            <div class="col-12 col-md-6 col-lg-4">
+
+                <a href="{{ url_for('ambientes') }}"
+                   class="text-decoration-none">
+
+                    <div class="card border-0 shadow-sm h-100 cc-card-hover">
+
+                        <div class="card-body text-center py-4">
+
+                            <h5 class="fw-bold text-success mb-2">
+                                🏢 Ambientes
+                            </h5>
+
+                            <div class="text-muted small">
+                                Gerenciar ambientes
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4">
+
+                <a href="{{ url_for('checklist') }}"
+                   class="text-decoration-none">
+
+                    <div class="card border-0 shadow-sm h-100 cc-card-hover">
+
+                        <div class="card-body text-center py-4">
+
+                            <h5 class="fw-bold text-success mb-2">
+                                ✓ Checklist
+                            </h5>
+
+                            <div class="text-muted small">
+                                Abrir checklist diário
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4">
+
+                <a href="{{ url_for('situacao_dia') }}"
+                   class="text-decoration-none">
+
+                    <div class="card border-0 shadow-sm h-100 cc-card-hover">
+
+                        <div class="card-body text-center py-4">
+
+                            <h5 class="fw-bold text-primary mb-2">
+                                📋 Situação do Dia
+                            </h5>
+
+                            <div class="text-muted small">
+                                Ver status dos ambientes
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4">
+
+                <a href="{{ url_for('historico') }}"
+                   class="text-decoration-none">
+
+                    <div class="card border-0 shadow-sm h-100 cc-card-hover">
+
+                        <div class="card-body text-center py-4">
+
+                            <h5 class="fw-bold text-dark mb-2">
+                                🕘 Histórico
+                            </h5>
+
+                            <div class="text-muted small">
+                                Consultar registros
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4">
+
+                <a href="{{ url_for('relatorios') }}"
+                   class="text-decoration-none">
+
+                    <div class="card border-0 shadow-sm h-100 cc-card-hover">
+
+                        <div class="card-body text-center py-4">
+
+                            <h5 class="fw-bold text-secondary mb-2">
+                                📄 Relatórios
+                            </h5>
+
+                            <div class="text-muted small">
+                                Gerar relatórios PDF
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4">
+
+                <a href="{{ url_for('funcionarios') }}"
+                   class="text-decoration-none">
+
+                    <div class="card border-0 shadow-sm h-100 cc-card-hover">
+
+                        <div class="card-body text-center py-4">
+
+                            <h5 class="fw-bold text-warning mb-2">
+                                👥 Funcionários
+                            </h5>
+
+                            <div class="text-muted small">
+                                Gerenciar usuários
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4">
+
+                <a href="{{ url_for('logs') }}"
+                class="text-decoration-none">
+
+                    <div class="card border-0 shadow-sm h-100 cc-card-hover">
+
+                        <div class="card-body text-center py-4">
+
+                            <h5 class="fw-bold text-danger mb-2">
+                                🛡 Logs
+                            </h5>
+
+                            <div class="text-muted small">
+                                Auditoria do sistema
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

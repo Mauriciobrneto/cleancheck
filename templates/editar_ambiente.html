@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h3 class="page-title">
+            Editar Ambiente
+        </h3>
+
+        <div class="page-subtitle">
+            Atualize os dados do ambiente
+        </div>
+    </div>
+
+    <a href="{{ url_for('ambientes') }}"
+       class="btn btn-outline-secondary btn-sm">
+
+        Voltar
+
+    </a>
+
+</div>
+
+<div class="card shadow-sm border-0">
+
+    <div class="card-header bg-white">
+        Dados do ambiente
+    </div>
+
+    <div class="card-body">
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Nome do ambiente
+                </label>
+
+                <input
+                    type="text"
+                    name="nome"
+                    class="form-control"
+                    value="{{ ambiente.nome }}"
+                    required
+                >
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Descrição
+                </label>
+
+                <textarea
+                    name="descricao"
+                    class="form-control"
+                    rows="3"
+                >{{ ambiente.descricao or '' }}</textarea>
+
+            </div>
+
+            <div class="mb-4">
+
+                <label class="form-label">
+                    Frequência
+                </label>
+
+                <select
+                    name="frequencia"
+                    class="form-select"
+                >
+
+                    <option value="diaria"
+                        {% if ambiente.frequencia == "diaria" %}
+                            selected
+                        {% endif %}
+                    >
+                        Diária
+                    </option>
+
+                    <option value="semanal"
+                        {% if ambiente.frequencia == "semanal" %}
+                            selected
+                        {% endif %}
+                    >
+                        Semanal
+                    </option>
+
+                    <option value="quinzenal"
+                        {% if ambiente.frequencia == "quinzenal" %}
+                            selected
+                        {% endif %}
+                    >
+                        Quinzenal
+                    </option>
+
+                    <option value="mensal"
+                        {% if ambiente.frequencia == "mensal" %}
+                            selected
+                        {% endif %}
+                    >
+                        Mensal
+                    </option>
+
+                </select>
+
+            </div>
+
+            <button type="submit" class="btn btn-success">
+                Salvar alterações
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

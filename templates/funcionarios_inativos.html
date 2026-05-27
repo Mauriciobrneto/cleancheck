@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h3 class="page-title">
+            Funcionários Inativos
+        </h3>
+
+        <div class="page-subtitle">
+            Funcionários desativados no sistema
+        </div>
+    </div>
+
+    <a href="{{ url_for('funcionarios') }}"
+       class="btn btn-outline-secondary btn-sm">
+
+        Voltar
+
+    </a>
+
+</div>
+
+{% if funcionarios %}
+
+    <div class="row g-3">
+
+        {% for funcionario in funcionarios %}
+
+            <div class="col-12 col-md-6 col-lg-4 col-xxl-3">
+
+                <div class="card shadow-sm border-0 h-100 cc-card-hover">
+
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+
+                            <div>
+
+                                <h6 class="fw-bold mb-1">
+                                    {{ funcionario.nome }}
+                                </h6>
+
+                                <small class="text-muted">
+                                    {{ funcionario.usuario }}
+                                </small>
+
+                            </div>
+
+                            <span class="badge rounded-pill bg-danger">
+                                Inativo
+                            </span>
+
+                        </div>
+
+                        <div class="small text-muted mb-3">
+                            {{ funcionario.email }}
+                        </div>
+
+                       <form method="POST"
+                            action="{{ url_for('reativar_funcionario', id=funcionario.id) }}"
+                            onsubmit="return confirm('Deseja reativar este funcionário?')">
+
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                            <button type="submit" class="btn btn-outline-success w-100">
+                                Reativar funcionário
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <div class="alert alert-secondary">
+        Nenhum funcionário inativo.
+    </div>
+
+{% endif %}
+
+{% endblock %}

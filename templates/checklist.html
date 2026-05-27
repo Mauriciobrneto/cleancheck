@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h3 class="mb-0 fw-bold">
+            Checklist Diário
+        </h3>
+
+        <small class="text-muted">
+            Controle diário de limpeza
+        </small>
+    </div>
+
+    <a href="{{ url_for('dashboard') }}"
+       class="btn btn-outline-secondary btn-sm">
+        Voltar
+    </a>
+
+</div>
+
+<form method="GET" class="mb-4">
+
+    <div class="input-group shadow-sm">
+
+        <input
+            type="text"
+            name="busca"
+            class="form-control"
+            placeholder="Buscar sala, banheiro, corredor..."
+            value="{{ busca }}"
+        >
+
+        <button class="btn btn-success">
+            Buscar
+        </button>
+
+        <a href="{{ url_for('checklist') }}"
+           class="btn btn-outline-secondary">
+            Limpar
+        </a>
+
+    </div>
+
+</form>
+
+<div class="card shadow-sm border-0 mb-4">
+
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between mb-2">
+
+            <strong>
+                Progresso do dia
+            </strong>
+
+            <span>
+                {{ concluidos }}/{{ total_ambientes }}
+            </span>
+
+        </div>
+
+        <div class="progress" style="height: 22px;">
+
+            <div
+                class="progress-bar bg-success"
+                role="progressbar"
+                style="width: {{ porcentagem }}%;"
+            >
+                {{ porcentagem }}%
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="d-flex flex-wrap gap-2 mb-4">
+
+    <a href="{{ url_for('checklist', filtro='todos', busca=busca) }}"
+       class="btn btn-sm {% if filtro == 'todos' %}btn-success{% else %}btn-outline-success{% endif %}">
+        Todos
+    </a>
+
+    <a href="{{ url_for('checklist', filtro='pendentes', busca=busca) }}"
+       class="btn btn-sm {% if filtro == 'pendentes' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+        Pendentes
+    </a>
+
+    <a href="{{ url_for('checklist', filtro='limpos', busca=busca) }}"
+       class="btn btn-sm {% if filtro == 'limpos' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        Limpos
+    </a>
+
+    <a href="{{ url_for('checklist', filtro='problemas', busca=busca) }}"
+       class="btn btn-sm {% if filtro == 'problemas' %}btn-danger{% else %}btn-outline-danger{% endif %}">
+        Problemas
+    </a>
+
+</div>
+
+{% if situacao %}
+
+    <div class="row g-3">
+
+        {% for item in situacao %}
+
+            <div class="col-12 col-md-6 col-lg-4 col-xxl-3">
+
+                <div class="card shadow-sm border-0 h-100">
+
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+
+                            <div>
+
+                                <h6 class="fw-bold mb-1">
+                                    {{ item.ambiente.nome }}
+                                </h6>
+
+                                <small class="text-muted">
+                                    {{ item.ambiente.frequencia }}
+                                </small>
+
+                            </div>
+
+                            {% if item.registro %}
+
+                                {% if item.registro.status == "limpo" %}
+
+                                    <span class="badge rounded-pill bg-success">
+                                        Limpo
+                                    </span>
+
+                                {% elif item.registro.status == "nao_limpo" %}
+
+                                    <span class="badge rounded-pill bg-danger">
+                                        Não limpo
+                                    </span>
+
+                                {% elif item.registro.status == "nao_autorizado" %}
+
+                                    <span class="badge rounded-pill bg-warning text-dark">
+                                        Não autorizado
+                                    </span>
+
+                                {% elif item.registro.status == "sem_acesso" %}
+
+                                    <span class="badge rounded-pill bg-dark">
+                                        Sem acesso
+                                    </span>
+
+                                {% elif item.registro.status == "nao_necessario" %}
+
+                                    <span class="badge rounded-pill bg-secondary">
+                                        Não necessário
+                                    </span>
+
+                                {% endif %}
+
+                            {% else %}
+
+                                <span class="badge rounded-pill bg-light text-dark border">
+                                    Pendente
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                        {% if item.ambiente.descricao %}
+
+                            <p class="text-muted small mb-3">
+                                {{ item.ambiente.descricao }}
+                            </p>
+
+                        {% endif %}
+
+                        <form method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                            <input
+                                type="hidden"
+                                name="ambiente_id"
+                                value="{{ item.ambiente.id }}"
+                            >
+
+                            <div class="d-grid gap-2">
+
+                                <button
+                                    type="submit"
+                                    name="acao"
+                                    value="limpo"
+                                    class="btn btn-success"
+                                >
+                                    ✓ Marcar como limpo
+                                </button>
+
+                                <details>
+
+                                    <summary class="btn btn-outline-secondary w-100">
+                                        Mais opções
+                                    </summary>
+
+                                    <div class="mt-3">
+
+                                        <div class="mb-2">
+
+                                            <select
+                                                name="status"
+                                                class="form-select"
+                                            >
+
+                                                <option value="limpo">
+                                                    Limpo
+                                                </option>
+
+                                                <option value="nao_limpo">
+                                                    Não limpo
+                                                </option>
+
+                                                <option value="nao_autorizado">
+                                                    Não autorizado
+                                                </option>
+
+                                                <option value="sem_acesso">
+                                                    Sem acesso
+                                                </option>
+
+                                                <option value="nao_necessario">
+                                                    Não necessário
+                                                </option>
+
+                                            </select>
+
+                                        </div>
+
+                                        <div class="mb-2 observacao-box"
+                                             style="display: none;">
+
+                                            <textarea
+                                                name="observacao"
+                                                class="form-control"
+                                                rows="2"
+                                                placeholder="Observação..."
+                                            ></textarea>
+
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            name="acao"
+                                            value="salvar"
+                                            class="btn btn-outline-success w-100"
+                                        >
+                                            Salvar
+                                        </button>
+
+                                    </div>
+
+                                </details>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <div class="alert alert-secondary">
+        Nenhum ambiente encontrado.
+    </div>
+
+{% endif %}
+
+<script>
+
+document.addEventListener("change", function(e) {
+
+    if (e.target.name === "status") {
+
+        const box = e.target
+            .closest("details")
+            .querySelector(".observacao-box");
+
+        if (
+            e.target.value === "nao_limpo" ||
+            e.target.value === "nao_autorizado" ||
+            e.target.value === "sem_acesso"
+        ) {
+
+            box.style.display = "block";
+
+        } else {
+
+            box.style.display = "none";
+
+        }
+    }
+});
+
+</script>
+
+{% endblock %}

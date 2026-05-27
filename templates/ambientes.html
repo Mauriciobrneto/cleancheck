@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h3 class="page-title">
+            Ambientes
+        </h3>
+
+        <div class="page-subtitle">
+            Gerenciamento de ambientes do sistema
+        </div>
+    </div>
+
+    <a href="{{ url_for('dashboard') }}"
+       class="btn btn-outline-secondary btn-sm">
+        Voltar
+    </a>
+
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+
+    <div class="card-header bg-white">
+        Cadastrar ambiente
+    </div>
+
+    <div class="card-body">
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Nome do ambiente
+                </label>
+
+                <input
+                    type="text"
+                    name="nome"
+                    class="form-control"
+                    required
+                >
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Descrição
+                </label>
+
+                <textarea
+                    name="descricao"
+                    class="form-control"
+                    rows="3"
+                ></textarea>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Frequência
+                </label>
+
+                <select
+                    name="frequencia"
+                    class="form-select"
+                >
+
+                    <option value="diaria">
+                        Diária
+                    </option>
+
+                    <option value="semanal">
+                        Semanal
+                    </option>
+
+                    <option value="quinzenal">
+                        Quinzenal
+                    </option>
+
+                    <option value="mensal">
+                        Mensal
+                    </option>
+
+                </select>
+
+            </div>
+
+            <button type="submit" class="btn btn-success">
+                Cadastrar ambiente
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<div class="card shadow-sm border-0">
+
+    <div class="card-header bg-white">
+        Ambientes cadastrados
+    </div>
+
+    <div class="card-body">
+
+        <div class="d-flex flex-wrap gap-2 mb-3">
+
+            <a href="{{ url_for('ambientes_inativos') }}"
+               class="btn btn-outline-secondary btn-sm">
+
+                Ver ambientes inativos
+
+            </a>
+
+        </div>
+
+        <form method="GET" class="mb-4">
+
+            <div class="input-group shadow-sm">
+
+                <input
+                    type="text"
+                    name="busca"
+                    class="form-control"
+                    placeholder="Buscar ambiente..."
+                    value="{{ busca }}"
+                >
+
+                <button class="btn btn-success">
+                    Buscar
+                </button>
+
+                <a href="{{ url_for('ambientes') }}"
+                   class="btn btn-outline-secondary">
+
+                    Limpar
+
+                </a>
+
+            </div>
+
+        </form>
+
+        {% if ambientes %}
+
+            <div class="row g-3">
+
+                {% for ambiente in ambientes %}
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xxl-3">
+
+                        <div class="card shadow-sm border-0 h-100 cc-card-hover">
+
+                            <div class="card-body">
+
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+
+                                    <div>
+
+                                        <h6 class="fw-bold mb-1">
+                                            {{ ambiente.nome }}
+                                        </h6>
+
+                                        <small class="text-muted">
+                                            {{ ambiente.frequencia }}
+                                        </small>
+
+                                    </div>
+
+                                    <span class="badge rounded-pill bg-success">
+                                        Ativo
+                                    </span>
+
+                                </div>
+
+                                {% if ambiente.descricao %}
+
+                                    <div class="small text-muted mb-3">
+                                        {{ ambiente.descricao }}
+                                    </div>
+
+                                {% endif %}
+
+                                <div class="d-grid gap-2">
+
+                                    <a href="{{ url_for('editar_ambiente', id=ambiente.id) }}"
+                                       class="btn btn-outline-primary">
+
+                                        Editar
+
+                                    </a>
+
+                                    <form method="POST"
+                                        action="{{ url_for('desativar_ambiente', id=ambiente.id) }}"
+                                        onsubmit="return confirm('Tem certeza que deseja desativar este ambiente?')">
+
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                                        <button type="submit" class="btn btn-outline-danger w-100">
+                                            Desativar
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="alert alert-secondary">
+                Nenhum ambiente cadastrado.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

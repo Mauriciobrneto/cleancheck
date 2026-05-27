@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h3 class="page-title">
+            Situação do Dia
+        </h3>
+
+        <div class="page-subtitle">
+            Status atual dos ambientes
+        </div>
+    </div>
+
+    <a href="{{ url_for('dashboard') }}"
+       class="btn btn-outline-secondary btn-sm">
+
+        Voltar
+
+    </a>
+
+</div>
+
+<form method="GET" class="mb-4">
+
+    <div class="input-group shadow-sm">
+
+        <input
+            type="text"
+            name="busca"
+            class="form-control"
+            placeholder="Buscar ambiente..."
+            value="{{ busca }}"
+        >
+
+        <button class="btn btn-success">
+            Buscar
+        </button>
+
+        <a href="{{ url_for('situacao_dia') }}"
+           class="btn btn-outline-secondary">
+
+            Limpar
+
+        </a>
+
+    </div>
+
+</form>
+
+{% if situacao %}
+
+    <div class="row g-3">
+
+        {% for item in situacao %}
+
+            <div class="col-12 col-md-6 col-lg-4 col-xxl-3">
+
+                <div class="card shadow-sm border-0 h-100 cc-card-hover">
+
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+
+                            <div>
+
+                                <h6 class="fw-bold mb-1">
+                                    {{ item.ambiente.nome }}
+                                </h6>
+
+                                <small class="text-muted">
+                                    {{ item.ambiente.frequencia }}
+                                </small>
+
+                            </div>
+
+                            {% if item.registro %}
+
+                                {% if item.registro.status == "limpo" %}
+
+                                    <span class="badge rounded-pill bg-success">
+                                        Limpo
+                                    </span>
+
+                                {% elif item.registro.status == "nao_limpo" %}
+
+                                    <span class="badge rounded-pill bg-danger">
+                                        Não limpo
+                                    </span>
+
+                                {% elif item.registro.status == "nao_autorizado" %}
+
+                                    <span class="badge rounded-pill bg-warning text-dark">
+                                        Não autorizado
+                                    </span>
+
+                                {% elif item.registro.status == "sem_acesso" %}
+
+                                    <span class="badge rounded-pill bg-dark">
+                                        Sem acesso
+                                    </span>
+
+                                {% elif item.registro.status == "nao_necessario" %}
+
+                                    <span class="badge rounded-pill bg-secondary">
+                                        Não necessário
+                                    </span>
+
+                                {% endif %}
+
+                            {% else %}
+
+                                <span class="badge rounded-pill bg-light text-dark border">
+                                    Pendente
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                        <div class="small text-muted mb-2">
+
+                            <strong>Funcionário:</strong>
+
+                            {% if item.usuario %}
+                                {{ item.usuario.nome }}
+                            {% else %}
+                                -
+                            {% endif %}
+
+                        </div>
+
+                        <div class="small text-muted mb-2">
+
+                            <strong>Hora:</strong>
+
+                            {% if item.registro %}
+                                {{ item.registro.hora_registro.strftime("%H:%M") }}
+                            {% else %}
+                                -
+                            {% endif %}
+
+                        </div>
+
+                        <div class="small">
+
+                            <strong>Observação:</strong>
+
+                            {% if item.registro and item.registro.observacao %}
+
+                                <div class="mt-1 text-muted">
+                                    {{ item.registro.observacao }}
+                                </div>
+
+                            {% else %}
+
+                                <div class="mt-1 text-muted">
+                                    Nenhuma observação
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <div class="alert alert-secondary">
+        Nenhum ambiente encontrado.
+    </div>
+
+{% endif %}
+
+{% endblock %}

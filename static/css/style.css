@@ -1,0 +1,118 @@
+:root {
+    --cc-green: #198754;
+    --cc-green-dark: #146c43;
+    --cc-bg: #f4f6f8;
+    --cc-card: #ffffff;
+    --cc-text: #1f2937;
+    --cc-muted: #6b7280;
+    --cc-border: #e5e7eb;
+}
+
+body {
+    background: var(--cc-bg) !important;
+    color: var(--cc-text);
+}
+
+.navbar {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.navbar-brand {
+    letter-spacing: 0.3px;
+}
+
+.nav-link {
+    font-weight: 500;
+    opacity: 0.92;
+}
+
+.nav-link:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+.card {
+    border: 1px solid var(--cc-border) !important;
+    border-radius: 16px !important;
+}
+
+.card-header {
+    border-radius: 16px 16px 0 0 !important;
+    font-weight: 600;
+}
+
+.shadow-sm {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06) !important;
+}
+
+.btn {
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.form-control,
+.form-select {
+    border-radius: 10px;
+}
+
+.badge {
+    font-weight: 500;
+    padding: 0.45em 0.7em;
+}
+
+.table {
+    font-size: 0.95rem;
+}
+
+.list-group-item {
+    border-color: var(--cc-border);
+}
+
+.progress {
+    border-radius: 999px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.page-title {
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.page-subtitle {
+    color: var(--cc-muted);
+    font-size: 0.9rem;
+}
+
+.cc-card-hover {
+    transition: all 0.2s ease;
+}
+
+.cc-card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08) !important;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .btn {
+        padding-top: 0.55rem;
+        padding-bottom: 0.55rem;
+    }
+
+    h3 {
+        font-size: 1.35rem;
+    }
+}

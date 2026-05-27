@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="text-center mb-5">
+
+    <h2 class="fw-bold">
+        CleanCheck
+    </h2>
+
+    <p class="text-muted mb-0">
+        Controle diário de limpeza
+    </p>
+
+</div>
+
+<div class="row g-3">
+
+    <div class="col-12">
+
+        <a href="{{ url_for('checklist') }}"
+           class="text-decoration-none">
+
+            <div class="card shadow-sm border-0 cc-card-hover">
+
+                <div class="card-body text-center py-4">
+
+                    <h4 class="fw-bold text-success mb-2">
+                        ✓ Checklist
+                    </h4>
+
+                    <div class="text-muted">
+                        Abrir checklist diário
+                    </div>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+    <div class="col-12">
+
+        <a href="{{ url_for('situacao_dia') }}"
+           class="text-decoration-none">
+
+            <div class="card shadow-sm border-0 cc-card-hover">
+
+                <div class="card-body text-center py-4">
+
+                    <h4 class="fw-bold text-primary mb-2">
+                        📋 Situação do Dia
+                    </h4>
+
+                    <div class="text-muted">
+                        Ver status dos ambientes
+                    </div>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+    <div class="col-12">
+
+        <a href="{{ url_for('minha_conta') }}"
+           class="text-decoration-none">
+
+            <div class="card shadow-sm border-0 cc-card-hover">
+
+                <div class="card-body text-center py-4">
+
+                    <h4 class="fw-bold text-secondary mb-2">
+                        ⚙ Minha Conta
+                    </h4>
+
+                    <div class="text-muted">
+                        Alterar senha
+                    </div>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

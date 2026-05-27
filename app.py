@@ -323,27 +323,25 @@ def funcionarios():
     if request.method == "POST":
         nome = request.form.get("nome")
         usuario = request.form.get("usuario")
-        email = request.form.get("email")
         senha = request.form.get("senha")
+        tipo = request.form.get("tipo", "funcionario")
 
         funcionario = Usuario(
             nome=nome,
             usuario=usuario,
-            email=email,
             senha=generate_password_hash(senha),
-            tipo="funcionario",
+            tipo=tipo,
             ativo=True
         )
 
         db.session.add(funcionario)
         db.session.commit()
 
-        flash("Funcionário cadastrado com sucesso!", "success")
+        flash("Usuário cadastrado com sucesso!", "success")
 
         return redirect(url_for("funcionarios"))
 
     lista_funcionarios = Usuario.query.filter_by(
-        tipo="funcionario",
         ativo=True
     ).order_by(
         Usuario.nome.asc()
@@ -367,8 +365,7 @@ def editar_funcionario(id):
     if request.method == "POST":
         funcionario.nome = request.form.get("nome")
         funcionario.usuario = request.form.get("usuario")
-        funcionario.email = request.form.get("email")
-
+        
         db.session.commit()
 
         flash("Funcionário atualizado com sucesso!", "success")
@@ -390,22 +387,31 @@ def desativar_funcionario(id):
 
     funcionario = Usuario.query.get_or_404(id)
 
-    if funcionario.tipo == "admin":
-        flash("Não é possível desativar o administrador.", "danger")
+    admins_ativos = Usuario.query.filter_by(
+        tipo="admin",
+        ativo=True
+    ).count()
+
+    if funcionario.tipo == "admin" and admins_ativos <= 1:
+
+        flash(
+            "Não é possível desativar o último administrador.",
+            "danger"
+        )
+
         return redirect(url_for("funcionarios"))
 
     funcionario.ativo = False
 
     registrar_log(
-    f"Desativou o funcionário: {funcionario.nome}"
+        f"Desativou o usuário: {funcionario.nome}"
     )
 
     db.session.commit()
 
-    flash("Funcionário desativado com sucesso!", "warning")
+    flash("Usuário desativado com sucesso!", "warning")
 
     return redirect(url_for("funcionarios"))
-
 
 @app.route("/funcionarios/inativos")
 @login_required

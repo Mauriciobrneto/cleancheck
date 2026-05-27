@@ -69,16 +69,28 @@
             <div class="mb-4">
 
                 <label class="form-label">
-                    Email
+                    Tipo de acesso
                 </label>
 
-                <input
-                    type="email"
-                    name="email"
-                    class="form-control"
-                    value="{{ funcionario.email }}"
-                    required
-                >
+                <select name="tipo" class="form-select">
+
+                    <option value="funcionario"
+                        {% if funcionario.tipo == "funcionario" %}
+                            selected
+                        {% endif %}
+                    >
+                        Funcionário
+                    </option>
+
+                    <option value="admin"
+                        {% if funcionario.tipo == "admin" %}
+                            selected
+                        {% endif %}
+                    >
+                        Administrador
+                    </option>
+
+                </select>
 
             </div>
 

@@ -78,7 +78,7 @@ def home():
 def login():
 
     if request.method == "POST":
-        usuario_digitado = request.form.get("usuario")
+        usuario_digitado = request.form.get("usuario").lower()
         senha = request.form.get("senha")
 
         usuario = Usuario.query.filter_by(usuario=usuario_digitado).first()
@@ -270,7 +270,7 @@ def funcionarios():
 
     if request.method == "POST":
         nome = request.form.get("nome")
-        usuario = request.form.get("usuario")
+        usuario = request.form.get("usuario").lower()
         senha = request.form.get("senha")
         tipo = request.form.get("tipo", "funcionario")
 
@@ -331,7 +331,7 @@ def editar_funcionario(id):
             return redirect(url_for("funcionarios"))
 
         funcionario.nome = request.form.get("nome")
-        funcionario.usuario = request.form.get("usuario")
+        funcionario.usuario = request.form.get("usuario").lower()
         funcionario.tipo = novo_tipo
 
         registrar_log(f"Editou o usuário: {funcionario.nome}")

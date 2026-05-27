@@ -1,42 +1,28 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file
-from flask_login import (
-    LoginManager,
-    login_user,
-    login_required,
-    logout_user,
-    current_user
-)
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date, datetime
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import os
 
 from config import Config
 from models import db, Usuario, Ambiente, RegistroLimpeza, LogAcao
 
-from flask_wtf.csrf import CSRFProtect
-
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-
-
-
-
-# ============================================================
-# CONFIGURAÇÃO PRINCIPAL DO APP
-# ============================================================
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+csrf = CSRFProtect(app)
 
 limiter = Limiter(
     get_remote_address,
     app=app,
     default_limits=[]
 )
-
-csrf = CSRFProtect(app)
 
 db.init_app(app)
 
@@ -45,39 +31,19 @@ login_manager.init_app(app)
 login_manager.login_view = "login"
 
 
-# ============================================================
-# LOGIN MANAGER
-# ============================================================
-
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(Usuario, int(user_id))
 
 
-# ============================================================
-# FUNÇÕES AUXILIARES
-# ============================================================
-
 def admin_required():
     if current_user.tipo != "admin":
         flash("Acesso negado!", "danger")
         return False
-
     return True
 
 
 def formatar_status(status):
-
-    def registrar_log(acao):
-
-        log = LogAcao(
-            usuario_id=current_user.id,
-            acao=acao
-        )
-
-        db.session.add(log)
-        db.session.commit()
-
     status_formatado = {
         "limpo": "Limpo",
         "nao_limpo": "Não limpo",
@@ -88,8 +54,8 @@ def formatar_status(status):
 
     return status_formatado.get(status, status)
 
-def registrar_log(acao):
 
+def registrar_log(acao):
     log = LogAcao(
         usuario_id=current_user.id,
         acao=acao
@@ -97,10 +63,6 @@ def registrar_log(acao):
 
     db.session.add(log)
 
-
-# ============================================================
-# ROTAS DE AUTENTICAÇÃO
-# ============================================================
 
 @app.route("/")
 def home():
@@ -132,10 +94,6 @@ def logout():
     logout_user()
     return redirect(url_for("login"))
 
-
-# ============================================================
-# DASHBOARD
-# ============================================================
 
 @app.route("/dashboard")
 @login_required
@@ -179,10 +137,6 @@ def dashboard():
     )
 
 
-# ============================================================
-# AMBIENTES
-# ============================================================
-
 @app.route("/ambientes", methods=["GET", "POST"])
 @login_required
 def ambientes():
@@ -202,6 +156,7 @@ def ambientes():
         )
 
         db.session.add(novo_ambiente)
+        registrar_log(f"Cadastrou o ambiente: {nome}")
         db.session.commit()
 
         flash("Ambiente cadastrado com sucesso!", "success")
@@ -238,6 +193,7 @@ def editar_ambiente(id):
         ambiente.descricao = request.form.get("descricao")
         ambiente.frequencia = request.form.get("frequencia")
 
+        registrar_log(f"Editou o ambiente: {ambiente.nome}")
         db.session.commit()
 
         flash("Ambiente atualizado com sucesso!", "success")
@@ -260,9 +216,7 @@ def desativar_ambiente(id):
     ambiente = Ambiente.query.get_or_404(id)
     ambiente.ativo = False
 
-    registrar_log(
-    f"Desativou o ambiente: {ambiente.nome}"
-    )
+    registrar_log(f"Desativou o ambiente: {ambiente.nome}")
 
     db.session.commit()
 
@@ -298,9 +252,7 @@ def reativar_ambiente(id):
     ambiente = Ambiente.query.get_or_404(id)
     ambiente.ativo = True
 
-    registrar_log(
-    f"Reativou o ambiente: {ambiente.nome}"
-    )
+    registrar_log(f"Reativou o ambiente: {ambiente.nome}")
 
     db.session.commit()
 
@@ -308,10 +260,6 @@ def reativar_ambiente(id):
 
     return redirect(url_for("ambientes_inativos"))
 
-
-# ============================================================
-# FUNCIONÁRIOS
-# ============================================================
 
 @app.route("/funcionarios", methods=["GET", "POST"])
 @login_required
@@ -326,15 +274,19 @@ def funcionarios():
         senha = request.form.get("senha")
         tipo = request.form.get("tipo", "funcionario")
 
+        email = f"{usuario}@cleancheck.local"
+
         funcionario = Usuario(
             nome=nome,
             usuario=usuario,
+            email=email,
             senha=generate_password_hash(senha),
             tipo=tipo,
             ativo=True
         )
 
         db.session.add(funcionario)
+        registrar_log(f"Cadastrou o usuário: {nome} como {tipo}")
         db.session.commit()
 
         flash("Usuário cadastrado com sucesso!", "success")
@@ -363,12 +315,30 @@ def editar_funcionario(id):
     funcionario = Usuario.query.get_or_404(id)
 
     if request.method == "POST":
+        novo_tipo = request.form.get("tipo", "funcionario")
+
+        admins_ativos = Usuario.query.filter_by(
+            tipo="admin",
+            ativo=True
+        ).count()
+
+        if funcionario.tipo == "admin" and novo_tipo != "admin" and admins_ativos <= 1:
+            flash(
+                "Não é possível remover o acesso do último administrador.",
+                "danger"
+            )
+
+            return redirect(url_for("funcionarios"))
+
         funcionario.nome = request.form.get("nome")
         funcionario.usuario = request.form.get("usuario")
-        
+        funcionario.tipo = novo_tipo
+
+        registrar_log(f"Editou o usuário: {funcionario.nome}")
+
         db.session.commit()
 
-        flash("Funcionário atualizado com sucesso!", "success")
+        flash("Usuário atualizado com sucesso!", "success")
 
         return redirect(url_for("funcionarios"))
 
@@ -393,7 +363,6 @@ def desativar_funcionario(id):
     ).count()
 
     if funcionario.tipo == "admin" and admins_ativos <= 1:
-
         flash(
             "Não é possível desativar o último administrador.",
             "danger"
@@ -403,15 +372,14 @@ def desativar_funcionario(id):
 
     funcionario.ativo = False
 
-    registrar_log(
-        f"Desativou o usuário: {funcionario.nome}"
-    )
+    registrar_log(f"Desativou o usuário: {funcionario.nome}")
 
     db.session.commit()
 
     flash("Usuário desativado com sucesso!", "warning")
 
     return redirect(url_for("funcionarios"))
+
 
 @app.route("/funcionarios/inativos")
 @login_required
@@ -421,7 +389,6 @@ def funcionarios_inativos():
         return redirect(url_for("dashboard"))
 
     funcionarios = Usuario.query.filter_by(
-        tipo="funcionario",
         ativo=False
     ).order_by(
         Usuario.nome.asc()
@@ -443,13 +410,11 @@ def reativar_funcionario(id):
     funcionario = Usuario.query.get_or_404(id)
     funcionario.ativo = True
 
-    registrar_log(
-    f"Reativou o funcionário: {funcionario.nome}"
-    )
+    registrar_log(f"Reativou o usuário: {funcionario.nome}")
 
     db.session.commit()
 
-    flash("Funcionário reativado com sucesso!", "success")
+    flash("Usuário reativado com sucesso!", "success")
 
     return redirect(url_for("funcionarios_inativos"))
 
@@ -468,9 +433,7 @@ def resetar_senha(id):
 
         funcionario.senha = generate_password_hash(nova_senha)
 
-        registrar_log(
-        f"Resetou a senha do funcionário: {funcionario.nome}"
-        )
+        registrar_log(f"Resetou a senha do usuário: {funcionario.nome}")
 
         db.session.commit()
 
@@ -483,10 +446,6 @@ def resetar_senha(id):
         funcionario=funcionario
     )
 
-
-# ============================================================
-# MINHA CONTA
-# ============================================================
 
 @app.route("/minha-conta", methods=["GET", "POST"])
 @login_required
@@ -512,10 +471,6 @@ def minha_conta():
 
     return render_template("minha_conta.html")
 
-
-# ============================================================
-# CHECKLIST DIÁRIO
-# ============================================================
 
 @app.route("/checklist", methods=["GET", "POST"])
 @login_required
@@ -557,6 +512,7 @@ def checklist():
             )
 
             db.session.add(novo_registro)
+
             registrar_log(
                 f"Registrou checklist do ambiente ID {ambiente_id} como {status}"
             )
@@ -583,6 +539,8 @@ def checklist():
         registro = RegistroLimpeza.query.filter_by(
             ambiente_id=ambiente.id,
             data_registro=date.today()
+        ).order_by(
+            RegistroLimpeza.hora_registro.desc()
         ).first()
 
         situacao.append({
@@ -592,7 +550,6 @@ def checklist():
 
     total_ambientes = len(situacao)
 
-    # Pendentes aparecem primeiro.
     situacao.sort(
         key=lambda item: (
             item["registro"] is not None,
@@ -600,7 +557,6 @@ def checklist():
         )
     )
 
-    # Filtros rápidos.
     if filtro == "pendentes":
         situacao = [
             item for item in situacao
@@ -645,17 +601,18 @@ def checklist():
     )
 
 
-# ============================================================
-# SITUAÇÃO DO DIA
-# ============================================================
-
 @app.route("/situacao-dia")
 @login_required
 def situacao_dia():
 
-    ambientes = Ambiente.query.filter_by(
-        ativo=True
-    ).order_by(
+    busca = request.args.get("busca", "")
+
+    query = Ambiente.query.filter_by(ativo=True)
+
+    if busca:
+        query = query.filter(Ambiente.nome.like(f"%{busca}%"))
+
+    ambientes = query.order_by(
         Ambiente.nome.asc()
     ).all()
 
@@ -682,13 +639,10 @@ def situacao_dia():
 
     return render_template(
         "situacao_dia.html",
-        situacao=situacao
+        situacao=situacao,
+        busca=busca
     )
 
-
-# ============================================================
-# HISTÓRICO
-# ============================================================
 
 @app.route("/historico")
 @login_required
@@ -717,10 +671,6 @@ def historico():
         data_filtro=data_filtro
     )
 
-
-# ============================================================
-# RELATÓRIOS
-# ============================================================
 
 @app.route("/relatorios")
 @login_required
@@ -820,48 +770,6 @@ def relatorio_pdf():
 
     return send_file(caminho_pdf, as_attachment=True)
 
-# ============================================================
-# TRATAMENTO DE ERROS
-# ============================================================
-
-@app.errorhandler(429)
-def ratelimit_handler(e):
-    flash(
-        "Muitas tentativas de login. Aguarde 1 minuto e tente novamente.",
-        "danger"
-    )
-
-    return redirect(url_for("login"))
-
-
-# ============================================================
-# INICIALIZAÇÃO DO BANCO
-# ============================================================
-
-with app.app_context():
-    db.create_all()
-
-    # Cria o usuário administrador inicial apenas se ainda não existir.
-    admin = Usuario.query.filter_by(usuario="admin").first()
-
-    if not admin:
-        admin = Usuario(
-            nome="Administrador",
-            usuario="admin",
-            email="admin@cleancheck.com",
-            senha=generate_password_hash("123456"),
-            tipo="admin",
-            ativo=True
-        )
-
-        db.session.add(admin)
-        db.session.commit()
-
-        print("Administrador criado com sucesso!")
-
-# ============================================================
-# LOGS DO SISTEMA
-# ============================================================
 
 @app.route("/logs")
 @login_required
@@ -880,9 +788,36 @@ def logs():
     )
 
 
-# ============================================================
-# EXECUÇÃO LOCAL
-# ============================================================
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    flash(
+        "Muitas tentativas de login. Aguarde 1 minuto e tente novamente.",
+        "danger"
+    )
+
+    return redirect(url_for("login"))
+
+
+with app.app_context():
+    db.create_all()
+
+    admin = Usuario.query.filter_by(usuario="admin").first()
+
+    if not admin:
+        admin = Usuario(
+            nome="Administrador",
+            usuario="admin",
+            email="admin@cleancheck.com",
+            senha=generate_password_hash("123456"),
+            tipo="admin",
+            ativo=True
+        )
+
+        db.session.add(admin)
+        db.session.commit()
+
+        print("Administrador criado com sucesso!")
+
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -38,22 +38,23 @@ def load_user(user_id):
 
 
 def admin_required():
-    def agora_brasil():
-        return datetime.now(ZoneInfo("America/Sao_Paulo"))
-    
     if current_user.tipo != "admin":
         flash("Acesso negado!", "danger")
         return False
+
     return True
 
 
+def agora_brasil():
+    return datetime.now(ZoneInfo("America/Sao_Paulo"))
+
+
 def formatar_status(status):
-    def agora_brasil():
-        return datetime.now(ZoneInfo("America/Sao_Paulo"))
+
     status_formatado = {
-    "limpo": "Limpo",
-    "nao_limpo": "Não limpo"
-}
+        "limpo": "Limpo",
+        "nao_limpo": "Não limpo"
+    }
 
     return status_formatado.get(status, status)
 
@@ -497,7 +498,7 @@ def checklist():
             registro_existente.status = status
             registro_existente.observacao = observacao
             registro_existente.usuario_id = current_user.id
-            registro_existente.hora_registro = datetime.now().time()
+            registro_existente.hora_registro = agora_brasil().time()
 
             registrar_log(
                 f"Atualizou checklist do ambiente ID {ambiente_id} para {status}"

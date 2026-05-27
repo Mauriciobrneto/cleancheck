@@ -45,12 +45,9 @@ def admin_required():
 
 def formatar_status(status):
     status_formatado = {
-        "limpo": "Limpo",
-        "nao_limpo": "Não limpo",
-        "nao_autorizado": "Não autorizado",
-        "sem_acesso": "Sem acesso",
-        "nao_necessario": "Não necessário"
-    }
+    "limpo": "Limpo",
+    "nao_limpo": "Não limpo"
+}
 
     return status_formatado.get(status, status)
 
@@ -111,11 +108,7 @@ def dashboard():
 
     problemas = RegistroLimpeza.query.filter(
         RegistroLimpeza.data_registro == date.today(),
-        RegistroLimpeza.status.in_([
-            "nao_limpo",
-            "nao_autorizado",
-            "sem_acesso"
-        ])
+        RegistroLimpeza.status == "nao_limpo"
     ).count()
 
     registros_hoje = RegistroLimpeza.query.filter_by(
@@ -485,6 +478,9 @@ def checklist():
         if acao == "limpo":
             status = "limpo"
             observacao = ""
+
+        elif acao == "nao_limpo":
+            status = "nao_limpo"
 
         registro_existente = RegistroLimpeza.query.filter_by(
             ambiente_id=ambiente_id,

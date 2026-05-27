@@ -102,16 +102,13 @@ class RegistroLimpeza(db.Model):
     )
 
     status = db.Column(
-        db.Enum(
-            "limpo",
-            "nao_limpo",
-            "nao_autorizado",
-            "sem_acesso",
-            "nao_necessario",
-            name="tipo_status_limpeza"
-        ),
-        nullable=False
-    )
+    db.Enum(
+        "limpo",
+        "nao_limpo",
+        name="tipo_status_limpeza"
+    ),
+    nullable=False
+)
 
     observacao = db.Column(db.Text)
 

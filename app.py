@@ -13,6 +13,10 @@ import os
 from config import Config
 from models import db, Usuario, Ambiente, RegistroLimpeza, LogAcao
 
+import io
+import csv
+import zipfile
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -516,7 +520,7 @@ def checklist():
                 status=status,
                 observacao=observacao,
                 data_registro=date.today(),
-                hora_registro=datetime.now().time()
+                hora_registro=agora_brasil().time()
             )
 
             db.session.add(novo_registro)
@@ -825,6 +829,86 @@ with app.app_context():
         db.session.commit()
 
         print("Administrador criado com sucesso!")
+
+@app.route("/backup")
+@login_required
+def backup():
+
+    if not admin_required():
+        return redirect(url_for("dashboard"))
+
+    memoria = io.BytesIO()
+
+    with zipfile.ZipFile(memoria, "w", zipfile.ZIP_DEFLATED) as zip_file:
+
+        def adicionar_csv(nome_arquivo, cabecalho, linhas):
+            arquivo = io.StringIO()
+            escritor = csv.writer(arquivo, delimiter=";")
+
+            escritor.writerow(cabecalho)
+
+            for linha in linhas:
+                escritor.writerow(linha)
+
+            zip_file.writestr(nome_arquivo, arquivo.getvalue())
+
+        adicionar_csv(
+            "usuarios.csv",
+            ["id", "nome", "usuario", "email", "tipo", "ativo"],
+            [
+                [u.id, u.nome, u.usuario, u.email, u.tipo, u.ativo]
+                for u in Usuario.query.all()
+            ]
+        )
+
+        adicionar_csv(
+            "ambientes.csv",
+            ["id", "nome", "descricao", "frequencia", "ativo"],
+            [
+                [a.id, a.nome, a.descricao, a.frequencia, a.ativo]
+                for a in Ambiente.query.all()
+            ]
+        )
+
+        adicionar_csv(
+            "registros_limpeza.csv",
+            ["id", "ambiente_id", "usuario_id", "status", "observacao", "data", "hora"],
+            [
+                [
+                    r.id,
+                    r.ambiente_id,
+                    r.usuario_id,
+                    r.status,
+                    r.observacao,
+                    r.data_registro,
+                    r.hora_registro
+                ]
+                for r in RegistroLimpeza.query.all()
+            ]
+        )
+
+        adicionar_csv(
+            "logs_acoes.csv",
+            ["id", "usuario_id", "acao", "criado_em"],
+            [
+                [l.id, l.usuario_id, l.acao, l.criado_em]
+                for l in LogAcao.query.all()
+            ]
+        )
+
+    memoria.seek(0)
+
+    nome_backup = f"backup_cleancheck_{agora_brasil().strftime('%Y-%m-%d_%H-%M')}.zip"
+
+    registrar_log("Gerou backup do sistema")
+    db.session.commit()
+
+    return send_file(
+        memoria,
+        as_attachment=True,
+        download_name=nome_backup,
+        mimetype="application/zip"
+    )
 
 
 if __name__ == "__main__":

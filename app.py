@@ -50,10 +50,10 @@ def agora_brasil():
 
 
 def formatar_status(status):
-
     status_formatado = {
         "limpo": "Limpo",
-        "nao_limpo": "Não limpo"
+        "nao_limpo": "Não limpo",
+        "nao_autorizado": "Não autorizado"
     }
 
     return status_formatado.get(status, status)
@@ -115,7 +115,10 @@ def dashboard():
 
     problemas = RegistroLimpeza.query.filter(
         RegistroLimpeza.data_registro == date.today(),
-        RegistroLimpeza.status == "nao_limpo"
+        RegistroLimpeza.status.in_([
+            "nao_limpo",
+            "nao_autorizado"
+        ])
     ).count()
 
     registros_hoje = RegistroLimpeza.query.filter_by(
@@ -484,10 +487,12 @@ def checklist():
 
         if acao == "limpo":
             status = "limpo"
-            observacao = ""
 
         elif acao == "nao_limpo":
             status = "nao_limpo"
+
+        elif acao == "nao_autorizado":
+            status = "nao_autorizado"
 
         registro_existente = RegistroLimpeza.query.filter_by(
             ambiente_id=ambiente_id,

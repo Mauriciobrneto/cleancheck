@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
@@ -910,6 +910,35 @@ def backup():
         mimetype="application/zip"
     )
 
+
+@app.route("/limpar-dados-antigos")
+@login_required
+def limpar_dados_antigos():
+
+    if not admin_required():
+        return redirect(url_for("dashboard"))
+
+    limite_logs = agora_brasil() - timedelta(days=60)
+    limite_registros = date.today() - timedelta(days=180)
+
+    logs_removidos = LogAcao.query.filter(
+        LogAcao.criado_em < limite_logs
+    ).delete()
+
+    registros_removidos = RegistroLimpeza.query.filter(
+        RegistroLimpeza.data_registro < limite_registros
+    ).delete()
+
+    db.session.commit()
+
+    flash(
+        f"Limpeza concluída! "
+        f"{logs_removidos} logs e "
+        f"{registros_removidos} registros removidos.",
+        "success"
+    )
+
+    return redirect(url_for("relatorios"))
 
 if __name__ == "__main__":
     app.run(debug=True)

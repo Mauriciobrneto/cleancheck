@@ -664,6 +664,7 @@ def historico():
         return redirect(url_for("dashboard"))
 
     data_filtro = request.args.get("data")
+    ambiente_filtro = request.args.get("ambiente_id", "")
 
     if data_filtro:
         data_busca = datetime.strptime(data_filtro, "%Y-%m-%d").date()
@@ -671,16 +672,31 @@ def historico():
         data_busca = date.today()
         data_filtro = data_busca.strftime("%Y-%m-%d")
 
-    registros = RegistroLimpeza.query.filter_by(
+    query = RegistroLimpeza.query.filter_by(
         data_registro=data_busca
-    ).order_by(
+    )
+
+    if ambiente_filtro:
+        query = query.filter(
+            RegistroLimpeza.ambiente_id == int(ambiente_filtro)
+        )
+
+    registros = query.order_by(
         RegistroLimpeza.hora_registro.desc()
+    ).all()
+
+    ambientes = Ambiente.query.filter_by(
+        ativo=True
+    ).order_by(
+        Ambiente.nome.asc()
     ).all()
 
     return render_template(
         "historico.html",
         registros=registros,
-        data_filtro=data_filtro
+        data_filtro=data_filtro,
+        ambiente_filtro=ambiente_filtro,
+        ambientes=ambientes
     )
 
 

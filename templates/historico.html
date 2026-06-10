@@ -29,27 +29,51 @@
 
     <div class="card-body">
 
-        <form method="GET" class="row g-2">
+       <form method="GET" class="row g-2">
 
-            <div class="col-md-4">
+        <div class="col-md-4">
+            <label class="form-label">Data</label>
 
-                <input
-                    type="date"
-                    name="data"
-                    value="{{ data_filtro }}"
-                    class="form-control"
-                >
+            <input
+                type="date"
+                name="data"
+                value="{{ data_filtro }}"
+                class="form-control"
+            >
+        </div>
 
-            </div>
+        <div class="col-md-4">
+            <label class="form-label">Ambiente</label>
 
-            <div class="col-md-2">
+            <select name="ambiente_id" class="form-select">
+                <option value="">Todos os ambientes</option>
 
-                <button class="btn btn-success w-100">
-                    Filtrar
-                </button>
+                {% for ambiente in ambientes %}
+                    <option value="{{ ambiente.id }}"
+                        {% if ambiente_filtro == ambiente.id|string %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ ambiente.nome }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
 
-            </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button class="btn btn-success w-100">
+                Filtrar
+            </button>
+        </div>
 
+        <div class="col-md-2 d-flex align-items-end">
+            <a href="{{ url_for('historico') }}"
+            class="btn btn-outline-secondary w-100">
+                Limpar
+            </a>
+        </div>
+
+    </form>
         </form>
 
     </div>

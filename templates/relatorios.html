@@ -78,7 +78,21 @@
                 <input type="date" name="data_fim" class="form-control" required>
             </div>
 
-            <div class="col-md-4 d-flex align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Ambiente</label>
+
+                <select name="ambiente_id" class="form-select">
+                    <option value="">Todos os ambientes</option>
+
+                    {% for ambiente in ambientes %}
+                        <option value="{{ ambiente.id }}">
+                            {{ ambiente.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-12 d-flex align-items-end">
                 <button class="btn btn-success w-100">
                     Gerar PDF
                 </button>

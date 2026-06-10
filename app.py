@@ -691,7 +691,16 @@ def relatorios():
     if not admin_required():
         return redirect(url_for("dashboard"))
 
-    return render_template("relatorios.html")
+    ambientes = Ambiente.query.filter_by(
+        ativo=True
+    ).order_by(
+        Ambiente.nome.asc()
+    ).all()
+
+    return render_template(
+        "relatorios.html",
+        ambientes=ambientes
+    )
 
 
 @app.route("/relatorio-pdf")
@@ -703,6 +712,7 @@ def relatorio_pdf():
 
     data_inicio = request.args.get("data_inicio")
     data_fim = request.args.get("data_fim")
+    ambiente_id = request.args.get("ambiente_id")
 
     if data_inicio and data_fim:
         inicio = datetime.strptime(data_inicio, "%Y-%m-%d").date()
@@ -711,10 +721,17 @@ def relatorio_pdf():
         inicio = date.today()
         fim = date.today()
 
-    registros = RegistroLimpeza.query.filter(
+    query = RegistroLimpeza.query.filter(
         RegistroLimpeza.data_registro >= inicio,
         RegistroLimpeza.data_registro <= fim
-    ).order_by(
+    )
+
+    if ambiente_id:
+        query = query.filter(
+            RegistroLimpeza.ambiente_id == int(ambiente_id)
+        )
+
+    registros = query.order_by(
         RegistroLimpeza.data_registro.asc(),
         RegistroLimpeza.hora_registro.asc()
     ).all()
